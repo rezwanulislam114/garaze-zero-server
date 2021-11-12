@@ -23,6 +23,7 @@ async function run() {
         const productsCollection = database.collection("products");
         const ordersCollection = database.collection("orders");
         const usersCollection = database.collection("users");
+        const reviewsCollection = database.collection("reviews");
 
         // post products 
         app.post('/products', async (req, res) => {
@@ -104,6 +105,20 @@ async function run() {
             const updateUser = { $set: { role: 'admin' } }
             const result = await usersCollection.updateOne(filter, updateUser)
             res.json(result)
+        })
+
+        // post reviews 
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewsCollection.insertOne(review);
+            res.json(result)
+        })
+
+        // get products 
+        app.get('/reviews', async (req, res) => {
+            const cursor = reviewsCollection.find({});
+            const reviews = await cursor.toArray();
+            res.send(reviews);
         })
 
     } finally {
