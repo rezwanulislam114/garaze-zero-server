@@ -21,13 +21,14 @@ async function run() {
 
         const database = client.db("GarageZero");
         const productsCollection = database.collection("products");
+        const ordersCollection = database.collection("orders");
+        const usersCollection = database.collection("users");
 
         // post products 
         app.post('/products', async (req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
-            console.log(`A document was inserted with the _id: ${result.insertedId}`);
-            res.json(product)
+            res.json(result)
         })
 
         // get products 
@@ -37,11 +38,71 @@ async function run() {
             res.send(products);
         })
 
+        // get single product 
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const quary = { _id: ObjectId(id) };
+            const product = await productsCollection.findOne(quary);
+            res.send(product);
+        })
+
         // delete products 
         app.delete('/products/:id', async (req, res) => {
             const id = req.params.id;
             const quary = { _id: ObjectId(id) }
             const result = await productsCollection.deleteOne(quary);
+            res.json(result)
+        })
+
+        // add order product
+        app.post('/orders', async (req, res) => {
+            const product = req.body;
+            const result = await ordersCollection.insertOne(product);
+            res.json(result)
+        })
+
+        // get ordered products
+        app.get('/orders', async (req, res) => {
+            const email = req.query.email;
+            const quary = { email: email }
+            const cursor = ordersCollection.find(quary)
+            const orderdProducts = await cursor.toArray();
+            res.send(orderdProducts);
+        })
+
+        // delete order 
+        app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const quary = { _id: ObjectId(id) }
+            const result = await ordersCollection.deleteOne(quary);
+            res.json(result)
+        })
+
+        // post user
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
+            res.json(result)
+        })
+
+        // get single user 
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const quary = { email: email };
+            const result = await usersCollection.findOne(quary);
+            let admin = false;
+            if (result?.role === 'admin') {
+                admin = true;
+            }
+            res.json({ admin: admin })
+        })
+
+        // update user as admin 
+        app.put('/users/admin', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const updateUser = { $set: { role: 'admin' } }
+            const result = await usersCollection.updateOne(filter, updateUser)
             res.json(result)
         })
 
