@@ -63,7 +63,7 @@ async function run() {
         })
 
         // get ordered products (by email)
-        app.get('/all-orders', async (req, res) => {
+        app.get('/orders', async (req, res) => {
             const email = req.query.email;
             const quary = { email: email }
             const cursor = ordersCollection.find(quary)
@@ -72,7 +72,7 @@ async function run() {
         })
 
         // get ordered products (all)
-        app.get('/orders', async (req, res) => {
+        app.get('/all-orders', async (req, res) => {
             const cursor = ordersCollection.find({})
             const orderdProducts = await cursor.toArray();
             res.send(orderdProducts);
